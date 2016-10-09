@@ -20,8 +20,10 @@
                     font-size: 150%;
             }
         </style>
+
+        <script src = "js/display.js"></script>
     </head>
-    <body style="background-color:#C7C9C7;
+    <body onload = "visualCanvas();" style="background-color:#C7C9C7;
     font-family:arial;">
     <div class="boxed"
     style="position:absolute;top:20px;left:100px;
@@ -30,18 +32,22 @@
     <h1>Mars Rover UI</h1>
 
     <img src="UAF%20Logo.png" alt="UAF Logo"
-    style="width:96px;height:86px;position:absolute;top:50px; 
+    style="width:96px;height:86px;position:absolute;top:50px;
     left:135px">
     <h2 style="position:absolute;top:160px;left:75px">Display</h2>
     <div class="display"
     style="position:absolute;top:220px;left:50px;
-    width:400px;height:400px;background-color:#D7D2CB;border:5px solid #236192">
+    width:259px;height:490px;background-color:#D7D2CB;border:5px solid #236192">
+    <canvas id="robotMap" width = "259" height = "490"
+      style = "position:absolute; left:0px; top 0px; z-index:1;">
+      Your browser doesn't support HTML5 Canvases.
+    </canvas>
     </div>
     <h2 style="position:absolute;top:160px;left:525px">Telemetry</h2>
     <div class="telemetry"
     style="position:absolute;top:220px;left:500px;
     width:250px;height:400px;background-color:#D7D2CB;border:5px solid #236192">
     </div>
-        
+
     </body>
 </html>
