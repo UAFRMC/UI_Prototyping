@@ -63,7 +63,7 @@ function visualCanvas ()
   {
     ctx = canvas.getContext("2d");
 
-    ctx.fillStyle = "gray";
+    ctx.fillStyle = "#D7D2CB";
     ctx.rect(0, 0, setup.width, setup.height);
     ctx.fill();
   }
@@ -99,7 +99,6 @@ function canvasUpdate ()
   requestAnimationFrame(canvasUpdate);
   obj_Update(robot.location.xMid, robot.location.yMid, robot.setup.width,
              robot.setup.height, robot.location.angle);
-
 }
 
 function arrowKey (evt)
