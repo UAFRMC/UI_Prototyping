@@ -77,9 +77,9 @@ function visual_canvas ()
     ctx.fill();
   }
 
-    canvasUpdate();
+    canvas_update();
     
-    window.addEventListener('keydown', arrowKey, true);
+    window.addEventListener('keydown', arrow_key, true);
 }
 
 function obj_update (xMid, yMid, width, height, deg)
@@ -105,8 +105,8 @@ function obj_update (xMid, yMid, width, height, deg)
 
 function canvas_update ()
 {
-    requestAnimationFrame(canvasUpdate);
-    obj_Update(robot.location.xMid, robot.location.yMid, robot.setup.width,
+    requestAnimationFrame(canvas_update);
+    obj_update(robot.location.xMid, robot.location.yMid, robot.setup.width,
              robot.setup.height, robot.location.angle);
 }
 
