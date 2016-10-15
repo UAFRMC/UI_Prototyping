@@ -7,7 +7,7 @@
 //  284.9 x 539 - Scale 11/15 pixel = 1 cm
 
 // canvas properties
-var setup = 
+var setup =
 {
   "width" : 259,
   "height" : 490,
@@ -21,44 +21,44 @@ var ctx;
 var canvas;
 
 // overarching object literal for robot
-var robot = 
+var robot =
 {
-    setup : 
+    setup :
     {
         "width" : 75,
         "height" : 38
     },
-    location : 
+    location :
     {
         "x" : setup.width/2 - 75/2,
         "y" : setup.height/2 + 38/2,
         "velocity" : 20,
         "angle" : 0,
         "angadjust" : 15,
-        get xMid () 
+        get xMid ()
         {
             return this.x + robot.setup.width/2;
         },
-        get yMid () 
+        get yMid ()
         {
             return this.y - robot.setup.height/2;
         }
     },
-    corners : 
+    corners :
     {
-        get tL () 
+        get tL ()
         {
 
         },
-    get tR () 
+    get tR ()
         {
 
         },
-    get bL () 
+    get bL ()
         {
 
         },
-    get bR () 
+    get bR ()
         {
 
         }
@@ -78,7 +78,7 @@ function visual_canvas ()
   }
 
     canvas_update();
-    
+
     window.addEventListener('keydown', arrow_key, true);
 }
 
@@ -128,6 +128,7 @@ function arrow_key (evt)
                           Math.sin (robot.location.angle * Math.PI/180);
             robot.location.y += robot.location.velocity *
                           Math.cos (robot.location.angle * Math.PI/180);
+            evt.preventDefault();
       // bounds?
         break;
         case setup.up:
@@ -135,6 +136,7 @@ function arrow_key (evt)
                           Math.sin (robot.location.angle * Math.PI/180);
             robot.location.y -= robot.location.velocity *
                           Math.cos (robot.location.angle * Math.PI/180);
+            evt.preventDefault();
       // bounds?
         break;
   }
