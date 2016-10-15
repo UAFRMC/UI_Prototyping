@@ -1,0 +1,80 @@
+body {
+  background-color:#C7C9C7;
+  font-family:arial;
+}
+
+#center-body {
+  width: fit-content;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  margin: auto;
+}
+
+h1 {
+  color: #236192;
+  font-family:verdana;
+  font-size:300%;
+
+}
+
+img {
+  width:96px;
+  height:86px;
+  padding-top: 3%;
+  padding-left: 5%;
+  display: inline-block;
+}
+
+.top {
+  color: #236192;
+  font-family: verdana;
+  font-size: 150%;
+  font-weight: bold;
+  margin-top: 5%;
+  margin-bottom: 2%;
+}
+
+#boxed {
+  width:590px;
+  height:125px;
+  margin-top: 3.5%;
+  background-color:#D7D2CB;
+  border:5px solid #236192;
+  color: #236192;
+  font-family:verdana;
+  font-weight: bold;
+  font-size:300%;
+}
+
+#boxedtxt {
+  margin-left: 5%;
+  margin-top: 6%;
+  display: inline-block;
+  vertical-align: top;
+}
+
+#displaytop {
+  margin-left: 5%;
+  display: inline-block;
+}
+
+#teletop {
+  margin-left: 40%;
+  display: inline-block;
+}
+
+#display {
+  width:259px;
+  height:490px;
+  background-color:#D7D2CB;
+  border:5px solid #236192;
+  float: left;
+}
+
+#telemetry {
+  margin-left: 57%;
+  width:250px;
+  height:400px;
+  background-color:#D7D2CB;
+  border:5px solid #236192;
+}
