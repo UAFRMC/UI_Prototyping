@@ -32,6 +32,8 @@ var robot =
     {
         "x" : setup.width/2 - 75/2,
         "y" : setup.height/2 + 38/2,
+        "restoreX" : setup.width/2 - 75/2,
+        "restoreY" : setup.height/2 + 38/2,
         "velocity" : 20,
         "angle" : 0,
         "angadjust" : 15,
@@ -42,25 +44,6 @@ var robot =
         get yMid ()
         {
             return this.y - robot.setup.height/2;
-        }
-    },
-    corners :
-    {
-        get tL ()
-        {
-
-        },
-    get tR ()
-        {
-
-        },
-    get bL ()
-        {
-
-        },
-    get bR ()
-        {
-
         }
     }
 };
@@ -76,7 +59,7 @@ function visual_canvas ()
     ctx.rect(0, 0, setup.width, setup.height);
     ctx.fill();
   }
-
+  
     canvas_update();
 
     window.addEventListener('keydown', arrow_key, true);
@@ -85,9 +68,11 @@ function visual_canvas ()
 function obj_update (xMid, yMid, width, height, deg)
 {
     var rad = -deg * Math.PI/180;
-
     var xRestore = -(xMid + width/2);
     var yRestore = -(yMid + height/2);
+
+    if(!checkBounds (xMid, yMid, deg))
+      return;
 
     ctx.save();
     ctx.fillRect(0, 0, setup.width, setup.height);
@@ -103,10 +88,23 @@ function obj_update (xMid, yMid, width, height, deg)
     ctx.restore();
 }
 
+function checkBounds (xMid, yMid, angle)
+{
+  if (xMid <= 0 || xMid >= setup.width || yMid <= 0 || yMid >= setup.height)
+  {
+    robot.location.y = robot.location.restoreY;
+    robot.location.x = robot.location.restoreX;
+    return false;
+  }
+  robot.location.restoreX = robot.location.x;
+  robot.location.restoreY = robot.location.y;
+  return true;
+}
+
 function canvas_update ()
 {
-    requestAnimationFrame(canvas_update);
-    obj_update(robot.location.xMid, robot.location.yMid, robot.setup.width,
+  requestAnimationFrame(canvas_update);
+  obj_update(robot.location.xMid, robot.location.yMid, robot.setup.width,
              robot.setup.height, robot.location.angle);
 }
 
@@ -117,27 +115,23 @@ function arrow_key (evt)
   {
         case setup.left:
             robot.location.angle += robot.location.angadjust;
-      // bounds?
-        break;
+            break;
         case setup.right:
             robot.location.angle -= robot.location.angadjust;
-      // bounds?
-        break;
+            break;
         case setup.down:
             robot.location.x += robot.location.velocity *
                           Math.sin (robot.location.angle * Math.PI/180);
             robot.location.y += robot.location.velocity *
                           Math.cos (robot.location.angle * Math.PI/180);
             evt.preventDefault();
-      // bounds?
-        break;
+            break;
         case setup.up:
             robot.location.x -= robot.location.velocity *
                           Math.sin (robot.location.angle * Math.PI/180);
             robot.location.y -= robot.location.velocity *
                           Math.cos (robot.location.angle * Math.PI/180);
             evt.preventDefault();
-      // bounds?
-        break;
+            break;
   }
 }
