@@ -1,20 +1,32 @@
 //  Boundaries
 //      Robot 1.5 m by .75 m
 //      Container 7.38 m long by 3.88 m wide
-//  Scale: 2/3 pixel = 1 cm
-//      Adjusted Container Size: 490 pixels by 259
-//      Adjusted Robot Size = 75 pixels by 38 pixels
-//  284.9 x 539 - Scale 11/15 pixel = 1 cm
+
+// TODO divide canvas into dumping area by rules, make location of lines for div
+// in object, modify telemetry receiving, change scale to 1 cm = 1px, make Scale
+// part of setup up object for easy adjusting, shift 0,0 to bottom left
 
 // canvas properties
+var field = {
+  "scale" : 0.01, // 1 px equals X meters
+  "width" : 3.88,
+  "height" : 7.38,
+  "robot" : {
+    "width" : 1.5,
+    "height" : .75
+  }
+}
+
 var setup =
 {
-  "width" : 259,
-  "height" : 490,
-  "left" : 37,
-  "right" : 39,
-  "down" : 40,
-  "up" : 38
+  "width" : field.width/field.scale,
+  "height" : field.height/field.scale,
+  "key" : {
+    "left" : 37,
+    "right" : 39,
+    "down" : 40,
+    "up" : 38
+  }
 };
 
 var ctx;
@@ -25,15 +37,15 @@ var robot =
 {
     setup :
     {
-        "width" : 75,
-        "height" : 38
+        "width" : field.robot.width/field.scale,
+        "height" : field.robot.height/field.scale
     },
     location :
     {
-        "x" : setup.width/2 - 75/2,
-        "y" : setup.height/2 + 38/2,
-        "restoreX" : setup.width/2 - 75/2,
-        "restoreY" : setup.height/2 + 38/2,
+        "x" : setup.width/2 - (field.robot.width/field.scale)/2,
+        "y" : setup.height + (field.robot.height/field.scale)/2,
+        "restoreX" : setup.width/2 - (field.robot.width/field.scale)/2,
+        "restoreY" : setup.height + (field.robot.height/field.scale)/2,
         "velocity" : 20,
         "angle" : 0,
         "angadjust" : 15,
@@ -59,7 +71,7 @@ function visual_canvas ()
     ctx.rect(0, 0, setup.width, setup.height);
     ctx.fill();
   }
-  
+
     canvas_update();
 
     window.addEventListener('keydown', arrow_key, true);
@@ -96,6 +108,7 @@ function checkBounds (xMid, yMid, angle)
     robot.location.x = robot.location.restoreX;
     return false;
   }
+
   robot.location.restoreX = robot.location.x;
   robot.location.restoreY = robot.location.y;
   return true;
@@ -113,20 +126,20 @@ function arrow_key (evt)
 
   switch (evt.keyCode)
   {
-        case setup.left:
+        case setup.key.left:
             robot.location.angle += robot.location.angadjust;
             break;
-        case setup.right:
+        case setup.key.right:
             robot.location.angle -= robot.location.angadjust;
             break;
-        case setup.down:
+        case setup.key.down:
             robot.location.x += robot.location.velocity *
                           Math.sin (robot.location.angle * Math.PI/180);
             robot.location.y += robot.location.velocity *
                           Math.cos (robot.location.angle * Math.PI/180);
             evt.preventDefault();
             break;
-        case setup.up:
+        case setup.key.up:
             robot.location.x -= robot.location.velocity *
                           Math.sin (robot.location.angle * Math.PI/180);
             robot.location.y -= robot.location.velocity *
