@@ -13,27 +13,32 @@ function robot_telemetry_t(div,robot,sim)
     
     if (!robot)
        { 
-            this.power =
+            this.telemetry =
             {
-                left:0.0,
-                right:0.0,
-                mine:0.0,
-                dump:0.0,
-                roll:0.0
+                power:
+                {
+                    left:0.0,
+                    right:0.0,
+                    mine:0.0,
+                    dump:0.0,
+                    roll:0.0
+                },
+                location:
+                {
+                    x:0.0,
+                    y:0.0,
+                    angle:0.0
+                }
             };
         }
         
     else
-        this.power = robot.power;
-
-    this.power.key = function(n) // Get the property value at this.power[n]
-    {
-        return this[Object.keys(this)[n]];
-    }
+        this.telemetry = robot.telemetry;
 
     if(sim)
         this.sim.power = sim.power;
 
+    this.telem_rows = {};
     this.create_telemetry_gui();
 
     var _this = this;
@@ -44,6 +49,7 @@ function robot_telemetry_t(div,robot,sim)
 
 }
 
+//PRIVATE FUNCTION DO NOT CALL OUTSIDE OF CONSTRUCTOR
 robot_telemetry_t.prototype.create_telemetry_gui = function()
 {
     this.table = document.createElement('table');
@@ -55,14 +61,18 @@ robot_telemetry_t.prototype.create_telemetry_gui = function()
     
     this.div.appendChild(this.table);
     this.table.appendChild(this.heading_row);
-    
-    for (prop in this.power)
+
+    for (var prop in this.telemetry)
     {
-        var current_row = this.table.appendChild(document.createElement('tr'));
-        if(prop != 'key') 
+        this.telem_rows[prop] = {};
+
+        for (var sensor in this.telemetry[prop])
         {
-            var prop_name = current_row.appendChild(document.createElement('td')).appendChild(document.createTextNode(prop));
-            var prop_value = current_row.appendChild(document.createElement('td')).appendChild(document.createTextNode(""));
+            var row = this.table.appendChild(document.createElement('tr'));
+            var col_name = row.appendChild(document.createElement('td')).appendChild(document.createTextNode(sensor));
+            var textnode=document.createTextNode("");
+            var col_value = row.appendChild(document.createElement('td')).appendChild(textnode);
+            this.telem_rows[prop][sensor] = textnode;
         }
 
     }
@@ -76,16 +86,18 @@ robot_telemetry_t.prototype.create_telemetry_gui = function()
 robot_telemetry_t.prototype.update_telemetry = function()
 {
     //FIX ME: Remove once real telemetry is available 
-    this.power.left = (Math.random()*30).toFixed(2);
-    this.power.right = (Math.random()*60).toFixed(2);
-    this.power.mine = (Math.random()*90).toFixed(2);
-    this.power.dump = (Math.random()).toFixed(2);
-    this.power.roll = (Math.random()).toFixed(2);
-
-    var rows = document.getElementsByTagName('tr');
+    this.telemetry.power.left = (Math.random()*30).toFixed(2);
+    this.telemetry.power.right = (Math.random()*60).toFixed(2);
+    this.telemetry.power.mine = (Math.random()*90).toFixed(2);
+    this.telemetry.power.dump = (Math.random()).toFixed(2);
+    this.telemetry.power.roll = (Math.random()).toFixed(2);
     
-    for (var i=1; i<rows.length-1;++i) //Skip heading row 
+    for (var prop in this.telemetry)
     {
-        rows[i].children[1].childNodes[0].data=this.power.key(i-1);
+        for (var sensor in this.telemetry[prop])
+        {
+            this.telem_rows[prop][sensor].nodeValue = this.telemetry[prop][sensor];
+        }
+
     }
 }
