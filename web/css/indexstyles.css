@@ -59,20 +59,20 @@ img {
 }
 
 #teletop {
-  margin-left: 40%;
+  margin-left: 49%;
   display: inline-block;
 }
 
 #display {
-  width:259px;
-  height:490px;
+  width:auto;
+  height:auto;
   background-color:#D7D2CB;
   border:5px solid #236192;
   float: left;
 }
 
 #telemetry {
-  margin-left: 57%;
+  margin-left: 65%;
   width:250px;
   height:400px;
   background-color:#D7D2CB;
