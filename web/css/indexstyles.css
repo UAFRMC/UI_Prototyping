@@ -59,20 +59,31 @@ img {
 }
 
 #teletop {
-  margin-left: 49%;
+  margin-left: 53%;
   display: inline-block;
 }
 
 #display {
-  width:auto;
+  position: relative;
   height:auto;
+  width:auto;
   background-color:#D7D2CB;
+}
+
+#display canvas {
+  position: absolute;
   border:5px solid #236192;
-  float: left;
+}
+
+#overlayMap {
+  z-index: 2;
+}
+#robotMap {
+  z-index: 1;
 }
 
 #telemetry {
-  margin-left: 65%;
+  margin-left: 70%;
   width:250px;
   height:400px;
   background-color:#D7D2CB;

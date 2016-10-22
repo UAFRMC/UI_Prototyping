@@ -1,150 +1,322 @@
+// display.js
+// Ryan Stonebraker
+// Last Edit 10/21/2016
+// graphical display of robot
+
 //  Boundaries
-//      Robot 1.5 m by .75 m
-//      Container 7.38 m long by 3.88 m wide
+//    Robot 1.5 m by .75 m
+//    Container 7.38 m long by 3.88 m wide
+//    Obstacle Start = 1.5 m from Start
+//    Mining Start = 4.44 m from Start
 
-// TODO divide canvas into dumping area by rules, make location of lines for div
-// in object, modify telemetry receiving, change scale to 1 cm = 1px, make Scale
-// part of setup up object for easy adjusting, shift 0,0 to bottom left
+// wheel trails /
+// change canvas size from js /
+// bounds /
+// robot icon
 
-// canvas properties
+// create property to check if telemetry received?
+
+// 1 cm to 1 px scale
 var field = {
-  "scale" : 0.01, // 1 px equals X meters
-  "width" : 3.88,
-  "height" : 7.38,
-  "robot" : {
-    "width" : 1.5,
-    "height" : .75
-  }
+  "width" : 388,
+  "height" : 738,
+  "obstacleStart" : 150,
+  "miningStart" : 444
 }
 
-var setup =
-{
-  "width" : field.width/field.scale,
-  "height" : field.height/field.scale,
-  "key" : {
-    "left" : 37,
-    "right" : 39,
-    "down" : 40,
-    "up" : 38
-  }
-};
+// temp keycodes if no telemetry
+var key = {
+    "left" : "A".charCodeAt(),
+    "right" : "D".charCodeAt(),
+    "down" : "S".charCodeAt(),
+    "up" : "W".charCodeAt()
+  };
 
 var ctx;
 var canvas;
+var overlayCanvas;
+var overlayCtx;
 
 // overarching object literal for robot
+
+// add telemetry
 var robot =
 {
-    setup :
+    dimension :
     {
-        "width" : field.robot.width/field.scale,
-        "height" : field.robot.height/field.scale
+        "width" : 150,
+        "height" : 75
     },
-    location :
+    telemetry : {
+      location : {
+        "x" : 0,
+        "y" : 0,
+        "angle" : 0,
+      },
+      power : {
+        "left" : 0,
+        "right" : 0,
+        "mine" : 0,
+        "dump" : 0,
+        "roll" : 0
+      },
+      get telemCheck ()
+      {
+        return (this.location.x || this.location.y || this.location.angle);
+      }
+    },
+    screen :
     {
-        "x" : setup.width/2 - (field.robot.width/field.scale)/2,
-        "y" : setup.height + (field.robot.height/field.scale)/2,
-        "restoreX" : setup.width/2 - (field.robot.width/field.scale)/2,
-        "restoreY" : setup.height + (field.robot.height/field.scale)/2,
+        "x" : 0,
+        "y" : 0,
+        "oldX" : 0,
+        "oldY" : 0,
         "velocity" : 20,
         "angle" : 0,
+        "oldAngle" : 0,
         "angadjust" : 15,
         get xMid ()
         {
-            return this.x + robot.setup.width/2;
+            return this.x + robot.dimension.width/2;
         },
         get yMid ()
         {
-            return this.y - robot.setup.height/2;
+            return this.y - robot.dimension.height/2;
         }
+    },
+    corner :
+    {
+      get localRad ()
+      {
+        return Math.atan(robot.dimension.height/robot.dimension.width);
+      },
+      get rotRad ()
+      {
+        return robot.screen.angle * Math.PI/180;
+      },
+      get hyp ()
+      {
+        return Math.sqrt((robot.dimension.width*robot.dimension.width)/4 +
+               (robot.dimension.height*robot.dimension.height)/4);
+      },
+      get bottomRight ()
+      {
+        var x = robot.screen.xMid + this.hyp * Math.cos(this.localRad - this.rotRad);
+        var y = robot.screen.yMid + this.hyp * Math.sin(this.localRad - this.rotRad);
+        return {x: x, y: y};
+      },
+      get topRight ()
+      {
+        var x = robot.screen.xMid + this.hyp * Math.cos(this.localRad + this.rotRad);
+        var y = robot.screen.yMid - this.hyp * Math.sin(this.localRad + this.rotRad);
+        return {x: x, y: y};
+      },
+      get topLeft ()
+      {
+        var x = robot.screen.xMid - this.hyp * Math.cos(this.localRad - this.rotRad);
+        var y = robot.screen.yMid - this.hyp * Math.sin(this.localRad - this.rotRad);
+        return {x: x, y: y};
+      },
+      get bottomLeft ()
+      {
+        var x = robot.screen.xMid - this.hyp * Math.cos(this.localRad + this.rotRad);
+        var y = robot.screen.yMid + this.hyp * Math.sin(this.localRad + this.rotRad);
+        return {x: x, y: y};
+      }
     }
+
 };
+
+// declare starting values independent of telemetry
+robot.screen.x = field.width/2 - (robot.dimension.width)/2;
+robot.screen.y = field.height;
+robot.screen.oldX = robot.screen.x;
+robot.screen.oldY = robot.screen.y;
+// end start val declare
 
 function visual_canvas ()
 {
-    canvas = document.getElementById("robotMap");
+  canvas = document.getElementById("robotMap");
+
+  // overlay canvas for obstacles and trail
+  overlayCanvas = document.getElementById("overlayMap");
 
   if (canvas.getContext)
   {
     ctx = canvas.getContext("2d");
+    overlayCtx = overlayCanvas.getContext("2d");
+
+    ctx.scale (1,1); // 1 cm width to 1 px width, 1 cm height to 1 px height
+
+    // make robotMap and canvasOverlay canvas size of field
+    canvas.width = field.width;
+    canvas.height = field.height;
+    overlayCanvas.width = field.width;
+    overlayCanvas.height = field.height;
+
     ctx.fillStyle = "#D7D2CB";
-    ctx.rect(0, 0, setup.width, setup.height);
+    ctx.rect(0, 0, field.width, field.height);
     ctx.fill();
   }
 
-    canvas_update();
+  canvas_update();
 
-    window.addEventListener('keydown', arrow_key, true);
+  window.addEventListener('keydown', arrow_key, true);
+}
+
+// canvas 0,0 at top left, robot 0,0 at bottom left --translate
+function sY_from_rY (yPos) // screen y pos from robot y pos
+{
+  return field.height - yPos;
 }
 
 function obj_update (xMid, yMid, width, height, deg)
 {
     var rad = -deg * Math.PI/180;
-    var xRestore = -(xMid + width/2);
-    var yRestore = -(yMid + height/2);
 
-    if(!checkBounds (xMid, yMid, deg))
+    if(!checkBounds ())
       return;
 
     ctx.save();
-    ctx.fillRect(0, 0, setup.width, setup.height);
 
+    ctx.fillRect(0, 0, field.width, field.height);
     // center canvas on robot, rotate canvas to degree, draw, move canvas back
     ctx.translate (xMid, yMid);
     ctx.rotate (rad);
 
-    ctx.translate (xRestore, yRestore);
-
-    ctx.strokeRect (xMid, yMid, width, height);
+    ctx.strokeRect (-width/2, -height/2, width, height);
 
     ctx.restore();
 }
 
-function checkBounds (xMid, yMid, angle)
+function checkBounds ()
 {
-  if (xMid <= 0 || xMid >= setup.width || yMid <= 0 || yMid >= setup.height)
+  // TODO Clean up
+  if (robot.corner.bottomLeft.x < 0 || robot.corner.bottomLeft.x > field.width)
   {
-    robot.location.y = robot.location.restoreY;
-    robot.location.x = robot.location.restoreX;
+    robot.screen.y = robot.screen.oldY;
+    robot.screen.x = robot.screen.oldX;
+    robot.screen.angle = robot.screen.oldAngle;
+    return false;
+  }
+  if (robot.corner.bottomRight.x < 0 || robot.corner.bottomRight.x > field.width)
+  {
+    robot.screen.y = robot.screen.oldY;
+    robot.screen.x = robot.screen.oldX;
+    robot.screen.angle = robot.screen.oldAngle;
+    return false;
+  }
+  if (robot.corner.topLeft.x < 0 || robot.corner.topLeft.x > field.width)
+  {
+    robot.screen.y = robot.screen.oldY;
+    robot.screen.x = robot.screen.oldX;
+    robot.screen.angle = robot.screen.oldAngle;
+    return false;
+  }
+  if (robot.corner.topRight.x < 0 || robot.corner.topRight.x > field.width)
+  {
+    robot.screen.y = robot.screen.oldY;
+    robot.screen.x = robot.screen.oldX;
+    robot.screen.angle = robot.screen.oldAngle;
+    return false;
+  }
+  if (robot.corner.bottomLeft.y < 0 || robot.corner.bottomLeft.y > field.height)
+  {
+    robot.screen.y = robot.screen.oldY;
+    robot.screen.x = robot.screen.oldX;
+    robot.screen.angle = robot.screen.oldAngle;
+    return false;
+  }
+  if (robot.corner.bottomRight.y < 0 || robot.corner.bottomRight.y > field.height)
+  {
+    robot.screen.y = robot.screen.oldY;
+    robot.screen.x = robot.screen.oldX;
+    robot.screen.angle = robot.screen.oldAngle;
+    return false;
+  }
+  if (robot.corner.topLeft.y < 0 || robot.corner.topLeft.y > field.height)
+  {
+    robot.screen.y = robot.screen.oldY;
+    robot.screen.x = robot.screen.oldX;
+    robot.screen.angle = robot.screen.oldAngle;
+    return false;
+  }
+  if (robot.corner.topRight.y < 0 || robot.corner.topRight.y > field.height)
+  {
+    robot.screen.y = robot.screen.oldY;
+    robot.screen.x = robot.screen.oldX;
+    robot.screen.angle = robot.screen.oldAngle;
     return false;
   }
 
-  robot.location.restoreX = robot.location.x;
-  robot.location.restoreY = robot.location.y;
+  robot.screen.oldX = robot.screen.x;
+  robot.screen.oldY = robot.screen.y;
+  robot.screen.oldAngle = robot.screen.angle;
   return true;
+}
+
+function divideScreen (l1, l2, w)
+{
+  l1 = sY_from_rY(l1);
+  l2 = sY_from_rY(l2);
+  overlayCtx.strokeStyle = "#000000";
+  overlayCtx.strokeRect (0, l1, w, 1);
+  overlayCtx.strokeRect (0, l2, w, 1);
+}
+
+function drawTrack (bottomLeft, bottomRight)
+{
+  overlayCtx.strokeStyle = "blue";
+  overlayCtx.strokeRect(robot.corner.bottomRight.x, robot.corner.bottomRight.y, 1, 1);
+  overlayCtx.strokeRect(robot.corner.bottomLeft.x, robot.corner.bottomLeft.y, 1, 1);
 }
 
 function canvas_update ()
 {
   requestAnimationFrame(canvas_update);
-  obj_update(robot.location.xMid, robot.location.yMid, robot.setup.width,
-             robot.setup.height, robot.location.angle);
+
+  if (robot.telemetry.telemCheck)
+  {
+    // TODO connect telemetry
+    robot.screen.x = robot.telemetry.location.x;
+    robot.screen.y = sY_from_rY(robot.telemetry.location.y);
+    robot.screen.angle = robot.telemetry.location.angle;
+  }
+
+  obj_update(robot.screen.xMid, robot.screen.yMid, robot.dimension.width,
+             robot.dimension.height, robot.screen.angle);
+
+  divideScreen (field.obstacleStart, field.miningStart, field.width);
+
+  drawTrack (robot.corner.bottomLeft, robot.corner.bottomRight);
 }
 
 function arrow_key (evt)
 {
-
+  if (!robot.telemetry.telemCheck)
+  {
   switch (evt.keyCode)
   {
-        case setup.key.left:
-            robot.location.angle += robot.location.angadjust;
+        case key.left:
+            robot.screen.angle += robot.screen.angadjust;
             break;
-        case setup.key.right:
-            robot.location.angle -= robot.location.angadjust;
+        case key.right:
+            robot.screen.angle -= robot.screen.angadjust;
             break;
-        case setup.key.down:
-            robot.location.x += robot.location.velocity *
-                          Math.sin (robot.location.angle * Math.PI/180);
-            robot.location.y += robot.location.velocity *
-                          Math.cos (robot.location.angle * Math.PI/180);
+        case key.down:
+            robot.screen.x += robot.screen.velocity *
+                          Math.sin (robot.screen.angle * Math.PI/180);
+            robot.screen.y += robot.screen.velocity *
+                          Math.cos (robot.screen.angle * Math.PI/180);
             evt.preventDefault();
             break;
-        case setup.key.up:
-            robot.location.x -= robot.location.velocity *
-                          Math.sin (robot.location.angle * Math.PI/180);
-            robot.location.y -= robot.location.velocity *
-                          Math.cos (robot.location.angle * Math.PI/180);
+        case key.up:
+            robot.screen.x -= robot.screen.velocity *
+                          Math.sin (robot.screen.angle * Math.PI/180);
+            robot.screen.y -= robot.screen.velocity *
+                          Math.cos (robot.screen.angle * Math.PI/180);
             evt.preventDefault();
             break;
   }
+}
 }
