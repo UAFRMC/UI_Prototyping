@@ -42,6 +42,7 @@ var overlayCtx;
 // add telemetry
 var robot =
 {
+    "img" : new Image(),
     dimension :
     {
         "width" : 150,
@@ -128,6 +129,7 @@ var robot =
 };
 
 // declare starting values independent of telemetry
+robot.img.src = "img/robot.svg"
 robot.screen.x = field.width/2 - (robot.dimension.width)/2;
 robot.screen.y = field.height;
 robot.screen.oldX = robot.screen.x;
@@ -184,70 +186,35 @@ function obj_update (xMid, yMid, width, height, deg)
     ctx.translate (xMid, yMid);
     ctx.rotate (rad);
 
-    ctx.strokeRect (-width/2, -height/2, width, height);
+    ctx.drawImage (robot.img, -width/2, -height/2);
+    //ctx.strokeRect (-width/2, -height/2, width, height);
 
     ctx.restore();
 }
 
 function checkBounds ()
 {
-  // TODO Clean up
-  if (robot.corner.bottomLeft.x < 0 || robot.corner.bottomLeft.x > field.width)
+  var x0 = robot.corner.bottomLeft.x < 0 || robot.corner.bottomRight.x < 0 ||
+           robot.corner.topLeft.x < 0 || robot.corner.topRight.x < 0;
+  var xW = robot.corner.bottomLeft.x > field.width ||
+           robot.corner.bottomRight.x > field.width ||
+           robot.corner.topLeft.x > field.width ||
+           robot.corner.topRight.x > field.width;
+  var y0 = robot.corner.bottomLeft.y < 0 || robot.corner.bottomRight.y < 0 ||
+           robot.corner.topLeft.y < 0 || robot.corner.topRight.y < 0;
+  var yH = robot.corner.bottomLeft.y > field.height ||
+           robot.corner.bottomRight.y > field.height ||
+           robot.corner.topLeft.y > field.height ||
+           robot.corner.topRight.y > field.height;
+
+  if (x0 || xW || y0 || yH)
   {
     robot.screen.y = robot.screen.oldY;
     robot.screen.x = robot.screen.oldX;
     robot.screen.angle = robot.screen.oldAngle;
     return false;
   }
-  if (robot.corner.bottomRight.x < 0 || robot.corner.bottomRight.x > field.width)
-  {
-    robot.screen.y = robot.screen.oldY;
-    robot.screen.x = robot.screen.oldX;
-    robot.screen.angle = robot.screen.oldAngle;
-    return false;
-  }
-  if (robot.corner.topLeft.x < 0 || robot.corner.topLeft.x > field.width)
-  {
-    robot.screen.y = robot.screen.oldY;
-    robot.screen.x = robot.screen.oldX;
-    robot.screen.angle = robot.screen.oldAngle;
-    return false;
-  }
-  if (robot.corner.topRight.x < 0 || robot.corner.topRight.x > field.width)
-  {
-    robot.screen.y = robot.screen.oldY;
-    robot.screen.x = robot.screen.oldX;
-    robot.screen.angle = robot.screen.oldAngle;
-    return false;
-  }
-  if (robot.corner.bottomLeft.y < 0 || robot.corner.bottomLeft.y > field.height)
-  {
-    robot.screen.y = robot.screen.oldY;
-    robot.screen.x = robot.screen.oldX;
-    robot.screen.angle = robot.screen.oldAngle;
-    return false;
-  }
-  if (robot.corner.bottomRight.y < 0 || robot.corner.bottomRight.y > field.height)
-  {
-    robot.screen.y = robot.screen.oldY;
-    robot.screen.x = robot.screen.oldX;
-    robot.screen.angle = robot.screen.oldAngle;
-    return false;
-  }
-  if (robot.corner.topLeft.y < 0 || robot.corner.topLeft.y > field.height)
-  {
-    robot.screen.y = robot.screen.oldY;
-    robot.screen.x = robot.screen.oldX;
-    robot.screen.angle = robot.screen.oldAngle;
-    return false;
-  }
-  if (robot.corner.topRight.y < 0 || robot.corner.topRight.y > field.height)
-  {
-    robot.screen.y = robot.screen.oldY;
-    robot.screen.x = robot.screen.oldX;
-    robot.screen.angle = robot.screen.oldAngle;
-    return false;
-  }
+
 
   robot.screen.oldX = robot.screen.x;
   robot.screen.oldY = robot.screen.y;
@@ -275,9 +242,9 @@ function canvas_update ()
 {
   requestAnimationFrame(canvas_update);
 
+  // TODO add telemetry
   if (robot.telemetry.telemCheck)
   {
-    // TODO connect telemetry
     robot.screen.x = robot.telemetry.location.x;
     robot.screen.y = sY_from_rY(robot.telemetry.location.y);
     robot.screen.angle = robot.telemetry.location.angle;
