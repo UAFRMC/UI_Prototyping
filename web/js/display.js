@@ -1,6 +1,6 @@
 // display.js
 // Ryan Stonebraker
-// Last Edit 10/21/2016
+// Last Edit 10/23/2016
 // graphical display of robot
 
 //  Boundaries
@@ -9,15 +9,11 @@
 //    Obstacle Start = 1.5 m from Start
 //    Mining Start = 4.44 m from Start
 
-// wheel trails /
-// change canvas size from js /
-// bounds /
-// robot icon
-
 // create property to check if telemetry received?
 
-// 1 cm to 1 px scale
+// 1 cm to 1 px scale, change scale to fit on screen
 var field = {
+  "scale" : 1,
   "width" : 388,
   "height" : 738,
   "obstacleStart" : 150,
@@ -148,13 +144,16 @@ function visual_canvas ()
     ctx = canvas.getContext("2d");
     overlayCtx = overlayCanvas.getContext("2d");
 
-    ctx.scale (1,1); // 1 cm width to 1 px width, 1 cm height to 1 px height
-
     // make robotMap and canvasOverlay canvas size of field
-    canvas.width = field.width;
-    canvas.height = field.height;
-    overlayCanvas.width = field.width;
-    overlayCanvas.height = field.height;
+    // scale does not change field size
+    canvas.width = field.width * field.scale;
+    canvas.height = field.height * field.scale;
+    overlayCanvas.width = field.width * field.scale;
+    overlayCanvas.height = field.height * field.scale;
+
+    // 1 cm width to 1 px width, 1 cm height to 1 px height
+    ctx.scale(field.scale,field.scale);
+    overlayCtx.scale(field.scale,field.scale);
 
     ctx.fillStyle = "#D7D2CB";
     ctx.rect(0, 0, field.width, field.height);
@@ -170,6 +169,11 @@ function visual_canvas ()
 function sY_from_rY (yPos) // screen y pos from robot y pos
 {
   return field.height - yPos;
+}
+
+function sX_from_rX (xPos) // screen x pos from robot x pos
+{
+  return field.width/2 + xPos;
 }
 
 function obj_update (xMid, yMid, width, height, deg)
@@ -242,12 +246,16 @@ function canvas_update ()
 {
   requestAnimationFrame(canvas_update);
 
-  // TODO add telemetry
+  //robot_telemetry_t(telemetry, robot, input_t());
   if (robot.telemetry.telemCheck)
   {
-    robot.screen.x = robot.telemetry.location.x;
+    robot.screen.x = sX_from_rX(robot.telemetry.location.x);
     robot.screen.y = sY_from_rY(robot.telemetry.location.y);
     robot.screen.angle = robot.telemetry.location.angle;
+  }
+  else
+  {
+
   }
 
   obj_update(robot.screen.xMid, robot.screen.yMid, robot.dimension.width,
@@ -256,6 +264,7 @@ function canvas_update ()
   divideScreen (field.obstacleStart, field.miningStart, field.width);
 
   drawTrack (robot.corner.bottomLeft, robot.corner.bottomRight);
+
 }
 
 function arrow_key (evt)
