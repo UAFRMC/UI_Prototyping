@@ -36,7 +36,7 @@ function robot_telemetry_t(div,robot,sim)
         this.telemetry = robot.telemetry;
 
     if(sim)
-        this.sim.power = sim.power;
+        this.telemetry = sim.telemetry;
 
     this.telem_rows = {};
     this.create_telemetry_gui();
@@ -86,12 +86,18 @@ robot_telemetry_t.prototype.create_telemetry_gui = function()
 robot_telemetry_t.prototype.update_telemetry = function()
 {
     //FIX ME: Remove once real telemetry is available 
+    //Random sensor telemetry 
     this.telemetry.power.left = (Math.random()*30).toFixed(2);
     this.telemetry.power.right = (Math.random()*60).toFixed(2);
     this.telemetry.power.mine = (Math.random()*90).toFixed(2);
     this.telemetry.power.dump = (Math.random()).toFixed(2);
     this.telemetry.power.roll = (Math.random()).toFixed(2);
     
+    //Random location telemetry
+    this.telemetry.location.x = (Math.random()*(194-(-194))-194).toFixed(2);
+    this.telemetry.location.y = (Math.random()*738).toFixed(2);
+    this.telemetry.location.angle = (Math.random()*(180-(-180))-180).toFixed(2)
+
     for (var prop in this.telemetry)
     {
         for (var sensor in this.telemetry[prop])
