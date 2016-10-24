@@ -87,10 +87,10 @@ var robot =
             return this.y - robot.dimension.height/2;
         },
         "trail" : { // arrays to store track location for bottom left/right x/y
-          "lX" : [],
-          "rX" : [],
-          "lY" : [],
-          "rY" : []
+          "lX" : new Array (15),
+          "rX" : new Array (15),
+          "lY" : new Array (15),
+          "rY" : new Array (15)
         }
     },
     corner :
@@ -231,6 +231,11 @@ function checkBounds ()
     return false;
   }
 
+  // draw tracks if in bounds and if isn't the same as last
+  if (robot.screen.x != robot.screen.oldX ||
+      robot.screen.angle != robot.screen.oldAngle ||
+      robot.screen.y != robot.screen.oldY)
+    drawTrack (robot.corner.bottomLeft, robot.corner.bottomRight);
 
   robot.screen.oldX = robot.screen.x;
   robot.screen.oldY = robot.screen.y;
@@ -249,23 +254,12 @@ function divideScreen (l1, l2, w)
 
 function drawTrack (bottomLeft, bottomRight)
 {
-  // TODO fix tracks to more than 3
   overlayCtx.clearRect (0, 0, field.width, field.height);
 
-  if (robot.screen.trail.lX.length <= 10)
-  {
-  robot.screen.trail.lX.push(robot.corner.bottomLeft.x);
-  robot.screen.trail.rX.push(robot.corner.bottomRight.x);
-  robot.screen.trail.lY.push(robot.corner.bottomLeft.y);
-  robot.screen.trail.rY.push(robot.corner.bottomRight.y);
-  }
-  else
-  {
     var iterateXY = [robot.screen.trail.lX, robot.screen.trail.rX,
                      robot.screen.trail.lY, robot.screen.trail.rY];
     var currentXY = [robot.corner.bottomLeft.x, robot.corner.bottomRight.x,
                      robot.corner.bottomLeft.y, robot.corner.bottomRight.y];
-
 
     for (var j = 0; j < 4; j++)
     {
@@ -283,10 +277,9 @@ function drawTrack (bottomLeft, bottomRight)
       }
         cArray[k] = tempArray[k-1];
     }
-
     }
-  }
-  for (var i = 0; i < 10; i++)
+
+  for (var i = 0; i < 15; i++)
   {
   overlayCtx.strokeStyle = "blue";
   overlayCtx.strokeRect(robot.screen.trail.rX[i], robot.screen.trail.rY[i], 1, 1);
@@ -304,14 +297,11 @@ function canvas_update ()
     robot.screen.y = sY_from_rY(robot.telemetry.location.y);
     robot.screen.angle = robot.telemetry.location.angle;
   }
-  // TODO fix tracks to more than 3 previous
-  drawTrack (robot.corner.bottomLeft, robot.corner.bottomRight);
 
   obj_update(robot.screen.xMid, robot.screen.yMid, robot.dimension.width,
              robot.dimension.height, robot.screen.angle);
 
   divideScreen (field.obstacleStart, field.miningStart, field.width);
-
 }
 
 function arrow_key (evt)
