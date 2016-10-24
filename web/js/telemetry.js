@@ -37,6 +37,8 @@ function robot_telemetry_t(div,robot,sim)
 
     if(sim)
         this.telemetry = sim.telemetry;
+    //FIX ME: Remove when real sim is implemented
+    this.sim_start_pos();
 
     this.telem_rows = {};
     this.create_telemetry_gui();
@@ -83,26 +85,35 @@ robot_telemetry_t.prototype.create_telemetry_gui = function()
     }
 }
 
+robot_telemetry_t.prototype.sim_start_pos = function()
+{
+    // We can start anywhere between [-194,194]x[0,150]
+    this.telemetry.location.x = (Math.random()*(194-(-194))-194);
+    this.telemetry.location.y = (Math.random()*150);
+
+    this.telemetry.location.angle = (Math.random()*(180-(-180))-180)
+}
 robot_telemetry_t.prototype.update_telemetry = function()
 {
     //FIX ME: Remove once real telemetry is available 
     //Random sensor telemetry 
-    this.telemetry.power.left = (Math.random()*30).toFixed(2);
-    this.telemetry.power.right = (Math.random()*60).toFixed(2);
-    this.telemetry.power.mine = (Math.random()*90).toFixed(2);
-    this.telemetry.power.dump = (Math.random()).toFixed(2);
-    this.telemetry.power.roll = (Math.random()).toFixed(2);
+    this.telemetry.power.left = Math.random()*30;
+    this.telemetry.power.right = Math.random()*60;
+    this.telemetry.power.mine = Math.random()*90;
+    this.telemetry.power.dump = Math.random();
+    this.telemetry.power.roll = Math.random();
     
     //Random location telemetry
-    this.telemetry.location.x = (Math.random()*(194-(-194))-194).toFixed(2);
-    this.telemetry.location.y = (Math.random()*738).toFixed(2);
-    this.telemetry.location.angle = (Math.random()*(180-(-180))-180).toFixed(2)
-
+    var velocity = Math.random()*20; //Follow's Ryan's px/keystroke unit
+    this.telemetry.location.x += velocity; //(Math.random()*(194-(-194))-194).toFixed(2);
+    this.telemetry.location.y += velocity; //(Math.random()*738).toFixed(2);
+    this.telemetry.location.angle = Math.random()*(180-(-180))-180
+    
     for (var prop in this.telemetry)
     {
         for (var sensor in this.telemetry[prop])
         {
-            this.telem_rows[prop][sensor].nodeValue = this.telemetry[prop][sensor];
+            this.telem_rows[prop][sensor].nodeValue = this.telemetry[prop][sensor].toFixed(2);
         }
 
     }
