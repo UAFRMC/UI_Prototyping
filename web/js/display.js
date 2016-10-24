@@ -12,6 +12,14 @@
 // create property to check if telemetry received?
 
 // 1 cm to 1 px scale, change scale to fit on screen
+
+// refactor code, make into "classes" .prototype. syntax,
+// in HTML do var display = new robotDisplay(divRobot, divOverlay, telemetry);
+// div is document.getElementById("robotMap")
+// use telemetry data to update screen data
+
+// make fading tracks for robot
+
 var field = {
   "scale" : 1,
   "width" : 388,
@@ -34,8 +42,6 @@ var overlayCanvas;
 var overlayCtx;
 
 // overarching object literal for robot
-
-// add telemetry
 var robot =
 {
     "img" : new Image(),
@@ -79,6 +85,12 @@ var robot =
         get yMid ()
         {
             return this.y - robot.dimension.height/2;
+        },
+        "trail" : { // arrays to store track location for bottom left/right x/y
+          "lX" : [],
+          "rX" : [],
+          "lY" : [],
+          "rY" : []
         }
     },
     corner :
@@ -237,33 +249,68 @@ function divideScreen (l1, l2, w)
 
 function drawTrack (bottomLeft, bottomRight)
 {
+  // TODO fix tracks to more than 3
+  overlayCtx.clearRect (0, 0, field.width, field.height);
+
+  if (robot.screen.trail.lX.length <= 10)
+  {
+  robot.screen.trail.lX.push(robot.corner.bottomLeft.x);
+  robot.screen.trail.rX.push(robot.corner.bottomRight.x);
+  robot.screen.trail.lY.push(robot.corner.bottomLeft.y);
+  robot.screen.trail.rY.push(robot.corner.bottomRight.y);
+  }
+  else
+  {
+    var iterateXY = [robot.screen.trail.lX, robot.screen.trail.rX,
+                     robot.screen.trail.lY, robot.screen.trail.rY];
+    var currentXY = [robot.corner.bottomLeft.x, robot.corner.bottomRight.x,
+                     robot.corner.bottomLeft.y, robot.corner.bottomRight.y];
+
+
+    for (var j = 0; j < 4; j++)
+    {
+      cArray = iterateXY[j];
+
+      var tempArray = [];
+    for (var k = 0; k < cArray.length; k++)
+    {
+      tempArray.push(cArray[k]);
+
+      if (k == 0)
+      {
+        cArray[0] = currentXY[j];
+        continue;
+      }
+        cArray[k] = tempArray[k-1];
+    }
+
+    }
+  }
+  for (var i = 0; i < 10; i++)
+  {
   overlayCtx.strokeStyle = "blue";
-  overlayCtx.strokeRect(robot.corner.bottomRight.x, robot.corner.bottomRight.y, 1, 1);
-  overlayCtx.strokeRect(robot.corner.bottomLeft.x, robot.corner.bottomLeft.y, 1, 1);
+  overlayCtx.strokeRect(robot.screen.trail.rX[i], robot.screen.trail.rY[i], 1, 1);
+  overlayCtx.strokeRect(robot.screen.trail.lX[i], robot.screen.trail.lY[i], 1, 1);
+  }
 }
 
 function canvas_update ()
 {
   requestAnimationFrame(canvas_update);
 
-  //robot_telemetry_t(telemetry, robot, input_t());
   if (robot.telemetry.telemCheck)
   {
     robot.screen.x = sX_from_rX(robot.telemetry.location.x);
     robot.screen.y = sY_from_rY(robot.telemetry.location.y);
     robot.screen.angle = robot.telemetry.location.angle;
   }
-  else
-  {
-
-  }
+  // TODO fix tracks to more than 3 previous
+  drawTrack (robot.corner.bottomLeft, robot.corner.bottomRight);
 
   obj_update(robot.screen.xMid, robot.screen.yMid, robot.dimension.width,
              robot.dimension.height, robot.screen.angle);
 
   divideScreen (field.obstacleStart, field.miningStart, field.width);
-
-  drawTrack (robot.corner.bottomLeft, robot.corner.bottomRight);
 
 }
 
