@@ -11,7 +11,7 @@
     <script src = "js/telemetry.js"></script>
   </head>
 
-  <body onload = "visual_canvas();">
+  <body>
     <div id = "center-body">
       <div id="boxed">
         <img src="img/UAF%20Logo.png" alt="UAF Logo">
@@ -31,7 +31,9 @@
         </div>
     </div>
     <script type="text/javascript">
-    var telemetry = new robot_telemetry_t(document.getElementById('telemetry'));
+    var display = new robot_display(document.getElementById('robotMap'),
+                                    document.getElementById('overlayMap'));
+    var telemetry = new robot_telemetry_t(document.getElementById('telemetry'), robot);
     </script>
   </body>
 </html>

@@ -1,6 +1,6 @@
 // display.js
 // Ryan Stonebraker
-// Last Edit 10/23/2016
+// Last Edit 10/28/2016
 // graphical display of robot
 
 //  Boundaries
@@ -11,14 +11,9 @@
 
 // create property to check if telemetry received?
 
-// 1 cm to 1 px scale, change scale to fit on screen
+// 1 cm to 1 px scale
 
-// refactor code, make into "classes" .prototype. syntax,
-// in HTML do var display = new robotDisplay(divRobot, divOverlay, telemetry);
-// div is document.getElementById("robotMap")
-// use telemetry data to update screen data
-
-// make fading tracks for robot
+// make tracks based on distance covered instead of num points
 
 var field = {
   "scale" : 1,
@@ -137,19 +132,27 @@ var robot =
 };
 
 // declare starting values independent of telemetry
-robot.img.src = "img/robot.svg"
+robot.img.src = "img/robot.svg";
 robot.screen.x = field.width/2 - (robot.dimension.width)/2;
 robot.screen.y = field.height;
 robot.screen.oldX = robot.screen.x;
 robot.screen.oldY = robot.screen.y;
 // end start val declare
 
-function visual_canvas ()
+// robot display "class" w/prototype syntax
+function robot_display (rMapDiv, oMapDiv)
 {
-  canvas = document.getElementById("robotMap");
+
+  if (!rMapDiv || !oMapDiv)
+    return null;
+
+  this.rMapDiv = rMapDiv;
+  this.oMapDiv = oMapDiv;
+
+  canvas = this.rMapDiv;
 
   // overlay canvas for obstacles and trail
-  overlayCanvas = document.getElementById("overlayMap");
+  overlayCanvas = this.oMapDiv;
 
   if (canvas.getContext)
   {
@@ -171,28 +174,27 @@ function visual_canvas ()
     ctx.rect(0, 0, field.width, field.height);
     ctx.fill();
   }
+  this.canvas_update();
 
-  canvas_update();
-
-  window.addEventListener('keydown', arrow_key, true);
+  window.addEventListener('keydown', this.arrow_key.bind(this), true);
 }
 
 // canvas 0,0 at top left, robot 0,0 at bottom left --translate
-function sY_from_rY (yPos) // screen y pos from robot y pos
+ robot_display.prototype.sY_from_rY = function(yPos) // screen y pos from robot y pos
 {
   return field.height - yPos;
 }
 
-function sX_from_rX (xPos) // screen x pos from robot x pos
+robot_display.prototype.sX_from_rX = function (xPos) // screen x pos from robot x pos
 {
   return field.width/2 + xPos;
 }
 
-function obj_update (xMid, yMid, width, height, deg)
+robot_display.prototype.obj_update = function (xMid, yMid, width, height, deg)
 {
     var rad = -deg * Math.PI/180;
 
-    if(!checkBounds ())
+    if(!this.checkBounds ())
       return;
 
     ctx.save();
@@ -208,7 +210,7 @@ function obj_update (xMid, yMid, width, height, deg)
     ctx.restore();
 }
 
-function checkBounds ()
+robot_display.prototype.checkBounds = function ()
 {
   var x0 = robot.corner.bottomLeft.x < 0 || robot.corner.bottomRight.x < 0 ||
            robot.corner.topLeft.x < 0 || robot.corner.topRight.x < 0;
@@ -235,7 +237,7 @@ function checkBounds ()
   if (robot.screen.x != robot.screen.oldX ||
       robot.screen.angle != robot.screen.oldAngle ||
       robot.screen.y != robot.screen.oldY)
-    drawTrack (robot.corner.bottomLeft, robot.corner.bottomRight);
+    this.drawTrack (robot.corner.bottomLeft, robot.corner.bottomRight);
 
   robot.screen.oldX = robot.screen.x;
   robot.screen.oldY = robot.screen.y;
@@ -243,17 +245,19 @@ function checkBounds ()
   return true;
 }
 
-function divideScreen (l1, l2, w)
+robot_display.prototype.divideScreen = function (l1, l2, w)
 {
-  l1 = sY_from_rY(l1);
-  l2 = sY_from_rY(l2);
+  l1 = this.sY_from_rY(l1);
+  l2 = this.sY_from_rY(l2);
   overlayCtx.strokeStyle = "#000000";
   overlayCtx.strokeRect (0, l1, w, 1);
   overlayCtx.strokeRect (0, l2, w, 1);
 }
 
-function drawTrack (bottomLeft, bottomRight)
+robot_display.prototype.drawTrack = function (bottomLeft, bottomRight)
 {
+  // TODO make distance based rather than num new location based
+
   overlayCtx.clearRect (0, 0, field.width, field.height);
 
     var iterateXY = [robot.screen.trail.lX, robot.screen.trail.rX,
@@ -287,24 +291,24 @@ function drawTrack (bottomLeft, bottomRight)
   }
 }
 
-function canvas_update ()
+robot_display.prototype.canvas_update = function ()
 {
-  requestAnimationFrame(canvas_update);
+  var that = this;
+  requestAnimationFrame(this.canvas_update.bind(this));
 
   if (robot.telemetry.telemCheck)
   {
-    robot.screen.x = sX_from_rX(robot.telemetry.location.x);
-    robot.screen.y = sY_from_rY(robot.telemetry.location.y);
+    robot.screen.x = this.sX_from_rX(robot.telemetry.location.x);
+    robot.screen.y = this.sY_from_rY(robot.telemetry.location.y);
     robot.screen.angle = robot.telemetry.location.angle;
   }
 
-  obj_update(robot.screen.xMid, robot.screen.yMid, robot.dimension.width,
-             robot.dimension.height, robot.screen.angle);
-
-  divideScreen (field.obstacleStart, field.miningStart, field.width);
+  this.obj_update(robot.screen.xMid, robot.screen.yMid, robot.dimension.width,
+                  robot.dimension.height, robot.screen.angle);
+  this.divideScreen (field.obstacleStart, field.miningStart, field.width);
 }
 
-function arrow_key (evt)
+robot_display.prototype.arrow_key = function (evt)
 {
   if (!robot.telemetry.telemCheck)
   {
