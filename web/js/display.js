@@ -293,14 +293,15 @@ robot_display.prototype.drawTrack = function (bottomLeft, bottomRight)
 
 robot_display.prototype.canvas_update = function ()
 {
-  var that = this;
-  requestAnimationFrame(this.canvas_update.bind(this));
+  var self = this;
+  requestAnimationFrame(function(){self.canvas_update();});
 
   if (robot.telemetry.telemCheck)
   {
+    // currently getting x as bottom left, 0 degrees to the right
     robot.screen.x = this.sX_from_rX(robot.telemetry.location.x);
     robot.screen.y = this.sY_from_rY(robot.telemetry.location.y);
-    robot.screen.angle = robot.telemetry.location.angle;
+    robot.screen.angle = -robot.telemetry.location.angle;
   }
 
   this.obj_update(robot.screen.xMid, robot.screen.yMid, robot.dimension.width,
