@@ -63,6 +63,13 @@ var robot =
         return (this.location.x || this.location.y || this.location.angle);
       }
     },
+    power : {
+        "left" : 0,
+        "right" : 0,
+        "mine" : 0,
+        "dump" : 0,
+        "roll" : 0
+      },
     screen :
     {
         "x" : 0,
