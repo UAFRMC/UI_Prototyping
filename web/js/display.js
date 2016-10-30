@@ -13,7 +13,12 @@
 
 // 1 cm to 1 px scale
 
-// make tracks based on distance covered instead of num points
+// side view
+// stop button
+// show controls
+// better simulator
+// more room for additional data
+// draw dumping zone
 
 var field = {
   "scale" : 1,
@@ -56,7 +61,8 @@ var robot =
         "right" : 0,
         "mine" : 0,
         "dump" : 0,
-        "roll" : 0
+        "roll" : 0,
+        "stop" : false
       },
       get telemCheck ()
       {
@@ -267,20 +273,20 @@ robot_display.prototype.drawTrack = function (bottomLeft, bottomRight)
 
     for (var j = 0; j < 4; j++)
     {
-      cArray = iterateXY[j];
+      var cArray = iterateXY[j];
 
       var tempArray = [];
-    for (var k = 0; k < cArray.length; k++)
-    {
-      tempArray.push(cArray[k]);
-
-      if (k == 0)
+      for (var k = 0; k < cArray.length; k++)
       {
-        cArray[0] = currentXY[j];
-        continue;
+        tempArray.push(cArray[k]);
+
+        if (k == 0)
+        {
+          cArray[0] = currentXY[j];
+          continue;
+        }
+          cArray[k] = tempArray[k-1];
       }
-        cArray[k] = tempArray[k-1];
-    }
     }
 
   for (var i = 0; i < 15; i++)
@@ -299,9 +305,18 @@ robot_display.prototype.canvas_update = function ()
   if (robot.telemetry.telemCheck)
   {
     // currently getting x as bottom left, 0 degrees to the right
+    // NOTE x position of robot can be -194 to (194-150) due to
+    // robots width
     robot.screen.x = this.sX_from_rX(robot.telemetry.location.x);
     robot.screen.y = this.sY_from_rY(robot.telemetry.location.y);
     robot.screen.angle = -robot.telemetry.location.angle;
+
+    // if hits edge and stays there, wont change color- new robot not drawn
+    if (robot.telemetry.power.mine > 45)
+      robot.img.src = "img/robot_mine.svg";
+    else
+      robot.img.src = "img/robot.svg";
+
   }
 
   this.obj_update(robot.screen.xMid, robot.screen.yMid, robot.dimension.width,
