@@ -9,6 +9,7 @@
     <script src = "js/input.js"></script>
     <script src = "js/display.js"></script>
     <script src = "js/telemetry.js"></script>
+    <script src = "js/pilot.js"></script>
   </head>
 
   <body>
@@ -27,13 +28,15 @@
             Your browser doesn't support HTML5 Canvases.
           </canvas>
         </div>
-        <div id="telemetry">
-        </div>
+        <div id="telemetry"></div>
+        <div id="drive"></div>
     </div>
     <script type="text/javascript">
     var display = new robot_display(document.getElementById('robotMap'),
                                     document.getElementById('overlayMap'));
     var telemetry = new robot_telemetry_t(document.getElementById('telemetry'), robot);
+    console.log(robot);
+    var robot_pilot = new robot_pilot_t(document.getElementById('drive'),robot);
     </script>
   </body>
 </html>
