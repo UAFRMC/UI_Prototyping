@@ -113,7 +113,11 @@ robot_telemetry_t.prototype.update_telemetry = function()
     {
         for (var sensor in this.telemetry[prop])
         {
-            this.telem_rows[prop][sensor].nodeValue = this.telemetry[prop][sensor].toFixed(2);
+            if (sensor!='stop')
+                this.telem_rows[prop][sensor].nodeValue = this.telemetry[prop][sensor].toFixed(2);
+            else
+                this.telem_rows[prop][sensor].nodeValue = this.telemetry[prop][sensor]
+
         }
 
     }
