@@ -74,7 +74,11 @@ var robot =
         "right" : 0,
         "mine" : 0,
         "dump" : 0,
-        "roll" : 0
+        "roll" : 0,
+        "powerLimit":0.3,
+        "highPowerLimit":0.7,
+        "highPower":false,
+        "mineLimit":0.3
       },
     screen :
     {
