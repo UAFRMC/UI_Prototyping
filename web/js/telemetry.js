@@ -10,9 +10,9 @@ function robot_telemetry_t(div,robot,sim)
         return null;
 
     this.div = div;
-    
+
     if (!robot)
-       { 
+       {
             this.telemetry =
             {
                 power:
@@ -31,7 +31,7 @@ function robot_telemetry_t(div,robot,sim)
                 }
             };
         }
-        
+
     else
         this.telemetry = robot.telemetry;
 
@@ -45,7 +45,7 @@ function robot_telemetry_t(div,robot,sim)
 
     var _this = this;
     this.update_interval = setInterval(function()
-        {   
+        {
             _this.update_telemetry();
         },1000);
 
@@ -56,11 +56,11 @@ robot_telemetry_t.prototype.create_telemetry_gui = function()
 {
     this.table = document.createElement('table');
     this.table.className= 'telemetry_table';
-    
+
     this.heading_row = document.createElement('tr');
     this.heading_row.appendChild(document.createElement('td')).appendChild(document.createElement('th')).appendChild(document.createTextNode("Sensor"));
-    this.heading_row.appendChild(document.createElement('td')).appendChild(document.createElement('th')).appendChild(document.createTextNode("Value"));    
-    
+    this.heading_row.appendChild(document.createElement('td')).appendChild(document.createElement('th')).appendChild(document.createTextNode("Value"));
+
     this.div.appendChild(this.table);
     this.table.appendChild(this.heading_row);
 
@@ -88,27 +88,27 @@ robot_telemetry_t.prototype.create_telemetry_gui = function()
 robot_telemetry_t.prototype.sim_start_pos = function()
 {
     // We can start anywhere between [-194,194]x[0,150]
-    this.telemetry.location.x = (Math.random()*(194-(-194))-194);
+    this.telemetry.location.x = (Math.random()*(194-(-194))-194-150);
     this.telemetry.location.y = (Math.random()*150);
 
     this.telemetry.location.angle = (Math.random()*(180-(-180))-180)
 }
 robot_telemetry_t.prototype.update_telemetry = function()
 {
-    //FIX ME: Remove once real telemetry is available 
-    //Random sensor telemetry 
+    //FIX ME: Remove once real telemetry is available
+    //Random sensor telemetry
     this.telemetry.power.left = Math.random()*30;
     this.telemetry.power.right = Math.random()*60;
     this.telemetry.power.mine = Math.random()*90;
     this.telemetry.power.dump = Math.random();
     this.telemetry.power.roll = Math.random();
-    
+
     //Random location telemetry
     var velocity = Math.random()*20; //Follow's Ryan's px/keystroke unit
     this.telemetry.location.x += velocity; //(Math.random()*(194-(-194))-194).toFixed(2);
     this.telemetry.location.y += velocity; //(Math.random()*738).toFixed(2);
     this.telemetry.location.angle = Math.random()*(180-(-180))-180
-    
+
     for (var prop in this.telemetry)
     {
         for (var sensor in this.telemetry[prop])

@@ -13,20 +13,22 @@
 
 // 1 cm to 1 px scale
 
-// side view
 // stop button
-// show controls
 // better simulator
 // more room for additional data
-// draw dumping zone
 
 var field = {
   "scale" : 1,
   "width" : 388,
-  "height" : 738,
+  "height" : 0,
   "obstacleStart" : 150,
-  "miningStart" : 444
+  "miningStart" : 444,
+  collectorBin : {
+    "width" : 165,
+    "height" : 48
+  }
 }
+field.height = 738 + field.collectorBin.height;
 
 // temp keycodes if no telemetry
 var key = {
@@ -151,7 +153,7 @@ var robot =
 // declare starting values independent of telemetry
 robot.img.src = "img/robot.svg";
 robot.screen.x = field.width/2 - (robot.dimension.width)/2;
-robot.screen.y = field.height;
+robot.screen.y = field.height - field.collectorBin.height;
 robot.screen.oldX = robot.screen.x;
 robot.screen.oldY = robot.screen.y;
 // end start val declare
@@ -191,6 +193,7 @@ function robot_display (rMapDiv, oMapDiv)
     ctx.rect(0, 0, field.width, field.height);
     ctx.fill();
   }
+
   this.canvas_update();
 
   window.addEventListener('keydown', this.arrow_key.bind(this), true);
@@ -199,12 +202,12 @@ function robot_display (rMapDiv, oMapDiv)
 // canvas 0,0 at top left, robot 0,0 at bottom left --translate
  robot_display.prototype.sY_from_rY = function(yPos) // screen y pos from robot y pos
 {
-  return field.height - yPos;
+  return field.height - (yPos + field.collectorBin.height);
 }
 
 robot_display.prototype.sX_from_rX = function (xPos) // screen x pos from robot x pos
 {
-  return field.width/2 + xPos;
+  return field.width/2 + (xPos + field.collectorBin.height);
 }
 
 robot_display.prototype.obj_update = function (xMid, yMid, width, height, deg)
@@ -229,6 +232,7 @@ robot_display.prototype.obj_update = function (xMid, yMid, width, height, deg)
 
 robot_display.prototype.checkBounds = function ()
 {
+  var fieldHeight = field.height - field.collectorBin.height;
   var x0 = robot.corner.bottomLeft.x < 0 || robot.corner.bottomRight.x < 0 ||
            robot.corner.topLeft.x < 0 || robot.corner.topRight.x < 0;
   var xW = robot.corner.bottomLeft.x > field.width ||
@@ -237,10 +241,10 @@ robot_display.prototype.checkBounds = function ()
            robot.corner.topRight.x > field.width;
   var y0 = robot.corner.bottomLeft.y < 0 || robot.corner.bottomRight.y < 0 ||
            robot.corner.topLeft.y < 0 || robot.corner.topRight.y < 0;
-  var yH = robot.corner.bottomLeft.y > field.height ||
-           robot.corner.bottomRight.y > field.height ||
-           robot.corner.topLeft.y > field.height ||
-           robot.corner.topRight.y > field.height;
+  var yH = robot.corner.bottomLeft.y > fieldHeight ||
+           robot.corner.bottomRight.y > fieldHeight ||
+           robot.corner.topLeft.y > fieldHeight ||
+           robot.corner.topRight.y > fieldHeight;
 
   if (x0 || xW || y0 || yH)
   {
@@ -266,9 +270,11 @@ robot_display.prototype.divideScreen = function (l1, l2, w)
 {
   l1 = this.sY_from_rY(l1);
   l2 = this.sY_from_rY(l2);
+  var l3 = this.sY_from_rY(0);
   overlayCtx.strokeStyle = "#000000";
   overlayCtx.strokeRect (0, l1, w, 1);
   overlayCtx.strokeRect (0, l2, w, 1);
+  overlayCtx.strokeRect (0, l3, w, 1);
 }
 
 robot_display.prototype.drawTrack = function (bottomLeft, bottomRight)
@@ -332,7 +338,16 @@ robot_display.prototype.canvas_update = function ()
 
   this.obj_update(robot.screen.xMid, robot.screen.yMid, robot.dimension.width,
                   robot.dimension.height, robot.screen.angle);
+  this.drawCollectorBin();
   this.divideScreen (field.obstacleStart, field.miningStart, field.width);
+}
+
+robot_display.prototype.drawCollectorBin = function()
+{
+  var absBottom = this.sY_from_rY(0);
+  overlayCtx.fillStyle = "darkgray";
+  overlayCtx.fillRect (field.width/2 - field.collectorBin.width/2, absBottom,
+                       field.collectorBin.width, field.collectorBin.height);
 }
 
 robot_display.prototype.arrow_key = function (evt)

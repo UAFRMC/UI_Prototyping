@@ -89,3 +89,25 @@ img {
   background-color:#D7D2CB;
   border:5px solid #236192;
 }
+
+#controlInstruct {
+  width:200px;
+  height:125px;
+  border: 5px solid #236192;
+  margin-top: 2%;
+  margin-left: 70%;
+  font-family: verdana;
+  font-size: 150%;
+  text-align: center;
+  background-color: #D7D2CB;
+}
+
+#sideViewer {
+  height: auto;
+  width: auto;
+  margin-left: 70%;
+  margin-top: 2%;
+}
+#sideView {
+  border: 5px solid #236192;
+}
