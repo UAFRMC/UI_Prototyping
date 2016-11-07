@@ -36,8 +36,10 @@ side_Display.prototype.mining_rotate = function (angle)
   var height = this.dimension.height;
   var xMid = sCanvas.width/2;
   var yMid = sCanvas.height/2;
-  var maxMine = 90; // placeholder for maximum mining amount
-  var mineAmt = this.power.mine/maxMine;
+
+  // placeholder vars for sensor looking into bag
+  var maxMine = 90; // placeholder heigth of bag
+  var mineAmt = this.power.mine/maxMine; // this.power.mine used to represent depth
 
   sCtx.save();
 
@@ -52,20 +54,24 @@ side_Display.prototype.mining_rotate = function (angle)
   sCtx.fillRect (-width/2, -height/2, width, height);
   sCtx.fillStyle = "#D7D2CB";
   sCtx.fillRect (-width/2, -height/2, width, (1-mineAmt) * height); // fill from top
+
+  // arrow pointing to top of robot side
+  sCtx.fillStyle = "darkgray";
+  sCtx.beginPath();
+  sCtx.moveTo(0, -height/2);
+  sCtx.lineTo(-width/4, -height/3);
+  sCtx.lineTo(width/4, -height/3);
+  sCtx.closePath();
+  sCtx.fill();
+
   sCtx.restore();
 }
 
-var refreshAmt = 0; // slow down orientation update data
-var orient = 0; // orientation placeholder if robot has this data
 side_Display.prototype.side_Update = function ()
 {
   var self = this;
   requestAnimationFrame(function(){self.side_Update();});
 
-  ++refreshAmt;
-  if (refreshAmt%100 == 0)
-    orient += Math.random()*20 - Math.random()*20; // placeholder for robot orientation
-
   // draw robot at specified orientation and graphically show mining amt
-  this.mining_rotate(orient);
+  this.mining_rotate(this.power.mine);
 }

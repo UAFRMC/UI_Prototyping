@@ -107,6 +107,10 @@ img {
   width: auto;
   margin-left: 70%;
   margin-top: 2%;
+  font-family: verdana;
+  color: #236192;
+  font-weight: bold;
+  text-indent: 20px;
 }
 #sideView {
   border: 5px solid #236192;

@@ -1,6 +1,6 @@
 // display.js
 // Ryan Stonebraker
-// Last Edit 10/28/2016
+// Last Edit 11/6/2016
 // graphical display of robot
 
 //  Boundaries
@@ -104,7 +104,8 @@ var robot =
           "lX" : new Array (15),
           "rX" : new Array (15),
           "lY" : new Array (15),
-          "rY" : new Array (15)
+          "rY" : new Array (15),
+          "num" : 15 // change this to match num items in array
         }
     },
     corner :
@@ -161,7 +162,6 @@ robot.screen.oldY = robot.screen.y;
 // robot display "class" w/prototype syntax
 function robot_display (rMapDiv, oMapDiv)
 {
-
   if (!rMapDiv || !oMapDiv)
     return null;
 
@@ -279,8 +279,6 @@ robot_display.prototype.divideScreen = function (l1, l2, w)
 
 robot_display.prototype.drawTrack = function (bottomLeft, bottomRight)
 {
-  // TODO make distance based rather than num new location based
-
   overlayCtx.clearRect (0, 0, field.width, field.height);
 
     var iterateXY = [robot.screen.trail.lX, robot.screen.trail.rX,
@@ -306,7 +304,7 @@ robot_display.prototype.drawTrack = function (bottomLeft, bottomRight)
       }
     }
 
-  for (var i = 0; i < 15; i++)
+  for (var i = 0, trails = robot.screen.trail.num; i < trails; i++)
   {
   overlayCtx.strokeStyle = "blue";
   overlayCtx.strokeRect(robot.screen.trail.rX[i], robot.screen.trail.rY[i], 1, 1);
